@@ -260,6 +260,7 @@ void EnableDodgeball()
 	}
 
 	g_bEnabled = true;
+	LogMessage( "Gamemode enabled" );
 }
 
 void DisableDodgeball()
@@ -306,6 +307,7 @@ void DisableDodgeball()
 	delete g_hMainHudSync;
 
 	g_bEnabled = false;
+	LogMessage( "Gamemode disabled" );
 }
 
 // ---- Rocket homing logic -------------------------
