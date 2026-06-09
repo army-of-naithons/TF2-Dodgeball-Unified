@@ -35,6 +35,7 @@ public Plugin myinfo =
 // ---- Global variables ----------------------------
 bool g_bEnabled;
 bool g_bRoundStarted;
+StringMap g_HookedEvents;
 
 // Rocket spawning
 int g_iRedSpawnerEntity;
@@ -129,6 +130,8 @@ public void OnPluginStart()
 	AddTempEntHook("TFExplosion", OnTFExplosion);
 
 	g_pMyWearables = view_as<Address>(FindSendPropInfo("CTFPlayer", "m_hMyWearables"));
+
+	g_HookedEvents = new StringMap();
 }
 
 // ---- Subplugin stuff -----------------------------
@@ -170,6 +173,23 @@ void SetupForwards()
 	g_ForwardOnRocketGameFrame = CreateGlobalForward("TFDB_OnRocketGameFrame", ET_Ignore, Param_Cell, Param_Array);
 }
 
+void HookEventSafe(const char[] eventName, EventHook callback, EventHookMode mode = EventHookMode_Post)
+{
+	if ( !g_HookedEvents.ContainsKey( eventName ) && HookEventEx( eventName, callback, mode ) )
+	{
+		g_HookedEvents.SetValue( eventName, 1 );
+	}
+}
+
+void UnhookEventSafe(const char[] eventName, EventHook callback, EventHookMode mode = EventHookMode_Post)
+{
+	if ( g_HookedEvents.ContainsKey( eventName ) )
+	{
+		UnhookEvent( eventName, callback, mode );
+		g_HookedEvents.Remove( eventName );
+	}
+}
+
 // ---- Enabling & disabling dodgeball --------------
 public void OnConfigsExecuted()
 {
@@ -194,14 +214,14 @@ void EnableDodgeball()
 	g_hSpeedometerHudColor = new StringMap();
 
 	// Hooking events
-	HookEvent("arena_round_start", OnSetupFinished, EventHookMode_PostNoCopy);
-	HookEvent("teamplay_round_win", OnRoundEnd, EventHookMode_PostNoCopy);
-	HookEvent("teamplay_round_stalemate", OnRoundEnd, EventHookMode_PostNoCopy);
-	HookEvent("player_spawn", OnPlayerSpawn, EventHookMode_Post);
-	HookEvent("player_death", OnPlayerDeath, EventHookMode_Pre);
-	HookEvent("post_inventory_application", OnPlayerInventory, EventHookMode_Post);
-	HookEvent("object_deflected", OnObjectDeflected);
-	
+	HookEventSafe("arena_round_start", OnSetupFinished, EventHookMode_PostNoCopy);
+	HookEventSafe("teamplay_round_win", OnRoundEnd, EventHookMode_PostNoCopy);
+	HookEventSafe("teamplay_round_stalemate", OnRoundEnd, EventHookMode_PostNoCopy);
+	HookEventSafe("player_spawn", OnPlayerSpawn, EventHookMode_Post);
+	HookEventSafe("player_death", OnPlayerDeath, EventHookMode_Pre);
+	HookEventSafe("post_inventory_application", OnPlayerInventory, EventHookMode_Post);
+	HookEventSafe("object_deflected", OnObjectDeflected);
+
 	PrecacheSound(SOUND_ALERT, true);
 	PrecacheSound(SOUND_SPAWN, true);
 	PrecacheSound(SOUND_SPEEDUP, true);
@@ -256,13 +276,14 @@ void DisableDodgeball()
 	delete g_hSpeedometerHudColor;
 
 	// Unhooking all events
-	UnhookEvent("arena_round_start", OnSetupFinished, EventHookMode_PostNoCopy);
-	UnhookEvent("teamplay_round_win", OnRoundEnd, EventHookMode_PostNoCopy);
-	UnhookEvent("teamplay_round_stalemate", OnRoundEnd, EventHookMode_PostNoCopy);
-	UnhookEvent("player_spawn", OnPlayerSpawn, EventHookMode_Post);
-	UnhookEvent("player_death", OnPlayerDeath, EventHookMode_Pre);
-	UnhookEvent("post_inventory_application", OnPlayerInventory, EventHookMode_Post);
-	UnhookEvent("object_deflected", OnObjectDeflected);
+	UnhookEventSafe("arena_round_start", OnSetupFinished, EventHookMode_PostNoCopy);
+	UnhookEventSafe("teamplay_round_win", OnRoundEnd, EventHookMode_PostNoCopy);
+	UnhookEventSafe("teamplay_round_stalemate", OnRoundEnd, EventHookMode_PostNoCopy);
+	UnhookEventSafe("player_spawn", OnPlayerSpawn, EventHookMode_Post);
+	UnhookEventSafe("player_death", OnPlayerDeath, EventHookMode_Pre);
+	UnhookEventSafe("post_inventory_application", OnPlayerInventory, EventHookMode_Post);
+	UnhookEventSafe("object_deflected", OnObjectDeflected);
+	g_HookedEvents.Clear();
 
 	// Resetting to default
 	SetConVarFloat(FindConVar("tf_flamethrower_burstammo"), 20.0);
