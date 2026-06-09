@@ -52,7 +52,7 @@ float g_fNERvoteTime;
 bool g_bNERenabled;
 
 // Respawn protection, NER & Solo
-float g_fLastRespawned; 
+float g_fLastRespawned;
 ConVar g_Cvar_RespawnProtection;
 
 int g_iBot; // Keeping track of dodgeball bot (for NER)
@@ -155,7 +155,7 @@ public APLRes AskPluginLoad2(Handle hMyself, bool bLate, char[] strError, int iE
 	CreateNative("TFDB_HasRoundStarted", Native_HasRoundStarted);
 
 	SetupForwards();
-	
+
 	return APLRes_Success;
 }
 
@@ -194,7 +194,7 @@ void UnhookEventSafe(const char[] eventName, EventHook callback, EventHookMode m
 public void OnConfigsExecuted()
 {
 	if (!IsDodgeBallMap()) return;
-	
+
 	EnableDodgeball();
 }
 
@@ -320,7 +320,7 @@ public void OnGameFrame()
 		g_bRoundStarted = false;
 		return;
 	}
-	
+
 	Rocket rocket;
 	float fCurrentTime = GetGameTime();
 
@@ -335,7 +335,7 @@ public void OnGameFrame()
 		// If we had set fTimeLastDeflect in OnObjectDeflected it would be out of sync with OnGameFrame, resulting in deflection delays
 		if (rocket.bRecentlyReflected)
 		{
-			rocket.fTimeLastDeflect = fCurrentTime; 
+			rocket.fTimeLastDeflect = fCurrentTime;
 			rocket.bRecentlyReflected = false;
 		}
 
@@ -345,7 +345,7 @@ public void OnGameFrame()
 			rocket.fTimeLastBounce = fCurrentTime;
 			rocket.bRecentlyBounced = false;
 		}
-		
+
 		float fTimeSinceLastDeflect = fCurrentTime - rocket.fTimeLastDeflect;
 		float fTimeSinceLastBounce = fCurrentTime - rocket.fTimeLastBounce;
 
@@ -435,7 +435,7 @@ public void OnGameFrame()
 			if (currentConfig.iWavetype && rocket.iDeflectionCount && rocket.RangeToTarget() > WAVE_RANGE)
 			{
 				float fDistanceToPlayer = GetVectorDistance(fPlayerPosition, fRocketPosition);
-				
+
 				// See inf. square well -> (L-x) * nπ/L, x starts at max distance, so L-x = distance travelled to target (not exactly, should do -250 due to airblast range, but close enough)
 				float fPhase = (rocket.fWaveDistance - fDistanceToPlayer) * rocket.fWaveOscillations * 3.14159 / rocket.fWaveDistance;
 
@@ -485,7 +485,7 @@ public void OnGameFrame()
 
 		CopyVec3(fRocketVelocity, rocket.fDirection);
 		ScaleVector(fRocketVelocity, rocket.fSpeed);
-	
+
 		// Rocket is being delayed
 		if (rocket.fTimeInOrbit > currentConfig.fDelayTime)
 		{
@@ -539,13 +539,13 @@ public Action OnStartTouch(int iEntity, int iClient)
 
 			rocket.iOwner = 0;
 		}
-		
+
 		if (rocket.bStolen && !currentConfig.bStolenRocketsDoDamage && rocket.bHasTarget)
 		{
 			SetEntDataFloat(rocket.iEntity, FindSendPropInfo("CTFProjectile_Rocket", "m_iDeflected") + 4, 0.0, true);
 			rocket.fDamage = 0.0;
 		}
-		
+
 		Forward_OnRocketHitPlayer(iIndex, rocket, iClient);
 
 		return Plugin_Continue;
@@ -565,7 +565,7 @@ public Action OnStartTouch(int iEntity, int iClient)
 
 	// The rocket hits the ground, calculate new rocket angles after bounce in OnTouch
 	SDKHook(rocket.iEntity, SDKHook_Touch, OnTouch);
-	
+
 	return Plugin_Continue;
 }
 
@@ -598,7 +598,7 @@ public Action OnTouch(int iEntity, int iClient)
 	static float fBounceVec[3];
 	ScaleVector(fNormal, GetVectorDotProduct(fNormal, fVelocity) * 2.0);
 	SubtractVectors(fVelocity, fNormal, fBounceVec);
-	
+
 	static float fNewAngles[3];
 	GetVectorAngles(fBounceVec, fNewAngles);
 
@@ -618,7 +618,7 @@ public Action OnTouch(int iEntity, int iClient)
 
 	// We have modified bRecentlyBounced & fDirection->(depending on if we should do crawling downspikes or not)
 	g_rockets.SetArray(iIndex, rocket);
-	
+
 	SDKUnhook(rocket.iEntity, SDKHook_Touch, OnTouch);
 
 	return Plugin_Handled;
@@ -680,13 +680,13 @@ void CreateRocket(int iSpawnerEntity, int iTeam)
 	g_bCurving = false;
 
 	char sHudText[225]; // 225 is character limit for hud text
-	
+
 	// This will have a lot of overlap, but its a better solution than trying to find all unique languages & coupling them to a client
 	for (int iClient = 1; iClient <= MaxClients; iClient++)
 	{
 		if (!IsClientInGame(iClient))
 			break;
-		
+
 		Format(sHudText, sizeof(sHudText), "%T", "Dodgeball_Hud_Speedometer", iClient, rocket.fSpeed, rocket.SpeedMpH(currentConfig.fMaxVelocity), rocket.iDeflectionCount, rocket.fSpeed / currentConfig.fMaxVelocity);
 
 		if (FindCharInString(sHudText, '{') != -1)
@@ -730,7 +730,7 @@ public void OnObjectDeflected(Event hEvent, char[] strEventName, bool bDontBroad
 {
 	int iEntity = hEvent.GetInt("object_entindex");
 
-	int iIndex = FindRocketIndexByEntity(iEntity);	
+	int iIndex = FindRocketIndexByEntity(iEntity);
 	if (iIndex == -1) return; // Object deflected was not a rocket of ours
 
 	Rocket rocket;
@@ -746,7 +746,7 @@ public void OnObjectDeflected(Event hEvent, char[] strEventName, bool bDontBroad
 		GetClientTeam(iNewOwner) != rocket.iTeam &&
 		!rocket.bBeingDelayed &&
 		GetEntitiesDistance(rocket.iTarget, iNewOwner) > currentConfig.fWallingDistance)
-	{		
+	{
 		g_iSteals[iNewOwner]++;
 		Forward_OnRocketSteal(iIndex, rocket, g_iSteals[iNewOwner]);
 
@@ -759,7 +759,7 @@ public void OnObjectDeflected(Event hEvent, char[] strEventName, bool bDontBroad
 				CPrintToChat(iNewOwner, "%t", "Dodgeball_Soft_Stealing_No_Steals");
 				if (currentConfig.bAnnounceSteals)
 					CPrintToChatAll("%t", "Dodgeball_No_Steals_Announce_All", iNewOwner);
-				
+
 				// Disabling the ability of reflecting rocket using attributes if not a target of (another) rocket
 				if (!NumRocketsTargetting(iNewOwner))
 				{
@@ -783,7 +783,7 @@ public void OnObjectDeflected(Event hEvent, char[] strEventName, bool bDontBroad
 			{
 				CPrintToChat(iNewOwner, "%t", "Dodgeball_Steal_Slay_Client");
 				if (currentConfig.bAnnounceSteals)
-					CPrintToChatAll("%t", "Dodgeball_Steal_Announce_Slay_All", iNewOwner); 
+					CPrintToChatAll("%t", "Dodgeball_Steal_Announce_Slay_All", iNewOwner);
 
 				ForcePlayerSuicide(iNewOwner);
 			}
@@ -809,12 +809,12 @@ public void OnObjectDeflected(Event hEvent, char[] strEventName, bool bDontBroad
 		TF2Attrib_SetByDefIndex(iWeapon, 826, 1.0);
 	}
 
-	// Setting new rocket variables	
+	// Setting new rocket variables
 	rocket.iOwner = iNewOwner;
 	rocket.iTeam = g_bFFAenabled ? 1 : GetClientTeam(rocket.iOwner);
 	rocket.iDeflectionCount++;
 
-	rocket.iBounces = 0; 
+	rocket.iBounces = 0;
 	rocket.fWaveDistance = 0.0;
 	rocket.fTimeInOrbit = 0.0;
 
@@ -850,7 +850,7 @@ public void OnObjectDeflected(Event hEvent, char[] strEventName, bool bDontBroad
 	{
 		if (!IsClientInGame(iClient))
 			break;
-		
+
 		Format(sHudText, sizeof(sHudText), "%T", g_bCurving ? "Dodgeball_Hud_Speedometer_MaxSpeed": "Dodgeball_Hud_Speedometer", iClient,
 				rocket.fSpeed, rocket.SpeedMpH(currentConfig.fMaxVelocity), rocket.iDeflectionCount, rocket.fSpeed / currentConfig.fMaxVelocity, rocket.SpeedMpH());
 
@@ -917,7 +917,7 @@ int SelectTarget(int iTeam, int iOwner, float fPosition[3], float fDirection[3])
 		int iWeapon = GetEntPropEnt(iTarget, Prop_Data, "m_hActiveWeapon");
 		TF2Attrib_SetByDefIndex(iWeapon, 826, 0.0);
 	}
-	
+
 	return iTarget;
 }
 
@@ -950,7 +950,7 @@ public void OnSetupFinished(Event hEvent, char[] strEventName, bool bDontBroadca
 		if (!IsValidClient(iClient)) continue;
 
 		g_iOldTeam[iClient] = 0; // FFA reset teams
-		
+
 		if (g_bSoloEnabled[iClient] && !IsSpectator(iClient))
 		{
 			// There are other players that are not solo'd (as of yet)
@@ -960,7 +960,7 @@ public void OnSetupFinished(Event hEvent, char[] strEventName, bool bDontBroadca
 					Format(namebuffer, sizeof(namebuffer), "%N", iClient);
 				else
 					Format(namebuffer, sizeof(namebuffer), ", %N", iClient);
-			
+
 				StrCat(buffer, sizeof(buffer), namebuffer);
 
 				g_soloQueue.Push(iClient);
@@ -1010,7 +1010,7 @@ public Action ManageRockets(Handle hTimer, any aData)
 			else
 				break; // Array is sorted so we can break out early
 		}
-		
+
 		// This only happens if config is misconfigured
 		if (currentConfig.bOneRocketPerTarget)
 			iRocketCount = iRocketCount > iLowestPlayerCountAlive ? iLowestPlayerCountAlive : iRocketCount;
@@ -1063,7 +1063,7 @@ void PopulateRocketSpawners()
 		// Have not seen tf_dodgeball_TEAM as of yet
 		if ((StrContains(strName, "rocket_spawn_red") != -1) || (StrContains(strName, "tf_dodgeball_red") != -1))
 			g_iRedSpawnerEntity = iEntity;
-			
+
 		if ((StrContains(strName, "rocket_spawn_blu") != -1) || (StrContains(strName, "tf_dodgeball_blu") != -1))
 			g_iBlueSpawnerEntity = iEntity;
 	}
@@ -1081,7 +1081,7 @@ void SetAttributes(int iSoloer = 0)
 
 		if (currentConfig.bDisablePlayerCollisions)
 			SetEntProp(iSoloer, Prop_Data, "m_CollisionGroup", 17);
-		else 
+		else
 			SetEntProp(iSoloer, Prop_Data, "m_CollisionGroup", 5);
 
 		iWeapon = GetEntPropEnt(iSoloer, Prop_Data, "m_hActiveWeapon");
@@ -1111,7 +1111,7 @@ void SetAttributes(int iSoloer = 0)
 		if (currentConfig.bDisablePlayerCollisions)
 			SetEntProp(iClient, Prop_Data, "m_CollisionGroup", 17);
 		// Set back to normal, COLLISION_GROUP_PLAYER = 5
-		else 
+		else
 			SetEntProp(iClient, Prop_Data, "m_CollisionGroup", 5);
 
 		iWeapon = GetEntPropEnt(iClient, Prop_Data, "m_hActiveWeapon");
@@ -1218,7 +1218,7 @@ public void OnPlayerInventory(Event hEvent, char[] strEventName, bool bDontBroad
 {
 	int iClient = GetClientOfUserId(hEvent.GetInt("userid"));
 	if (!IsValidClient(iClient)) return;
-	
+
 	for (int iSlot = 1; iSlot < 5; iSlot++)
 	{
 		int iEntity = GetPlayerWeaponSlot(iClient, iSlot);
@@ -1231,11 +1231,11 @@ public void OnPlayerSpawn(Event hEvent, char[] strEventName, bool bDontBroadcast
 {
 	int iClient = GetClientOfUserId(hEvent.GetInt("userid"));
 	if (!IsValidClient(iClient)) return;
-	
+
 	TFClassType iClass = TF2_GetPlayerClass(iClient);
-	
+
 	if (iClass == TFClass_Pyro) return;
-	
+
 	TF2_SetPlayerClass(iClient, TFClass_Pyro, _, true);
 	TF2_RespawnPlayer(iClient);
 }
@@ -1263,7 +1263,7 @@ public void OnPlayerDeath(Event hEvent, char[] strEventName, bool bDontBroadcast
 							rocket.fSpeed, rocket.SpeedMpH(currentConfig.fMaxVelocity), rocket.iDeflectionCount, rocket.fSpeed / currentConfig.fMaxVelocity, rocket.SpeedMpH());
 		}
 	}
-	
+
 	// If it is a 1v1 (someone left / went to spectator, disable NER)
 	if (g_bNERenabled && GetTeamClientCount(g_iLastDeadTeam) <= 1 && GetTeamClientCount(AnalogueTeam(g_iLastDeadTeam)) <= 1)
 	{
@@ -1288,7 +1288,7 @@ public void OnPlayerDeath(Event hEvent, char[] strEventName, bool bDontBroadcast
 				if (g_bSoloEnabled[iSoloer] && !IsSpectator(iSoloer) && !IsPlayerAlive(iSoloer))
 					break;
 			}
-				
+
 			if (g_bSoloEnabled[iSoloer] && !IsSpectator(iSoloer) && !IsPlayerAlive(iSoloer))
 			{
 				// Respawn solo player
@@ -1308,11 +1308,11 @@ public void OnPlayerDeath(Event hEvent, char[] strEventName, bool bDontBroadcast
 		{
 			int iRandomOpponent = GetTeamRandomAliveClient(AnalogueTeam(g_iLastDeadTeam));
 			g_iOldTeam[iRandomOpponent] = AnalogueTeam(g_iLastDeadTeam);
-		
+
 			ChangeAliveClientTeam(iRandomOpponent, g_iLastDeadTeam);
 
 			return;
-		}		
+		}
 
 		// Both teams had 1 player left, no soloers & no can be switched so respawn everyone
 		if (g_bNERenabled && GetTeamAliveCount(AnalogueTeam(g_iLastDeadTeam)) == 1)
@@ -1331,7 +1331,7 @@ public void OnPlayerDeath(Event hEvent, char[] strEventName, bool bDontBroadcast
 			int iWinner = GetTeamRandomAliveClient(AnalogueTeam(g_iLastDeadTeam));
 			int iMarkedSoloer = 0;
 
-			// Add to list to be reshuffled & respawned			
+			// Add to list to be reshuffled & respawned
 			for (int iPlayer = 1; iPlayer <= MaxClients; iPlayer++)
 			{
 				if (!IsClientInGame(iPlayer) || IsSpectator(iPlayer))
@@ -1367,15 +1367,15 @@ public void OnPlayerDeath(Event hEvent, char[] strEventName, bool bDontBroadcast
 
 			// fisher yates shuffle & respawn, start respawning for last dead team to avoid round end
 			for (int i = iTotalNERplayers - 1; i >= 0; i--)
-			{						
+			{
 				int j = GetRandomInt(0, i);
 
 				ChangeClientTeam(iNERplayers[j], iNewTeam);
 				TF2_RespawnPlayer(iNERplayers[j]);
-				
+
 				if (!g_iBot)
 					iNewTeam = AnalogueTeam(iNewTeam);
-					
+
 				iNERplayers[j] = iNERplayers[i];
 			}
 
@@ -1385,7 +1385,7 @@ public void OnPlayerDeath(Event hEvent, char[] strEventName, bool bDontBroadcast
 			{
 				if (!IsValidClient(iPlayer) || IsSpectator(iPlayer) || g_bSoloEnabled[iPlayer])
 					continue;
-				
+
 				if (!IsPlayerAlive(iPlayer))
 				{
 					ChangeClientTeam(iPlayer, iNewTeam);
@@ -1414,7 +1414,7 @@ public void OnPlayerDeath(Event hEvent, char[] strEventName, bool bDontBroadcast
 							Format(namebuffer, sizeof(namebuffer), "%N", iPlayer);
 						else
 							Format(namebuffer, sizeof(namebuffer), ", %N", iPlayer);
-		
+
 						StrCat(buffer, sizeof(buffer), namebuffer);
 
 						g_soloQueue.Push(iPlayer);
@@ -1439,7 +1439,7 @@ public void OnPlayerDeath(Event hEvent, char[] strEventName, bool bDontBroadcast
 						Format(namebuffer, sizeof(namebuffer), "%N", iWinner);
 					else
 						Format(namebuffer, sizeof(namebuffer), ", %N", iWinner);
-			
+
 					StrCat(buffer, sizeof(buffer), namebuffer);
 
 					g_soloQueue.Push(iWinner);
@@ -1462,7 +1462,7 @@ public void OnPlayerDeath(Event hEvent, char[] strEventName, bool bDontBroadcast
 			if (g_bSoloEnabled[iClient])
 				RequestFrame(RespawnPlayerCallback, 0);
 			else
-				RequestFrame(RespawnPlayerCallback, iClient); 
+				RequestFrame(RespawnPlayerCallback, iClient);
 
 			if (!g_soloQueue.Empty)
 				CPrintToChatAll("%t", "Dodgeball_Solo_Announce_All_Soloers", buffer);
@@ -1474,14 +1474,14 @@ void RespawnPlayerCallback(any aData)
 {
 	if (aData)
 		TF2_RespawnPlayer(aData);
-		
+
 	// We only notify non-solo players of being respawned
 	for (int iClient = 1; iClient <= MaxClients; iClient++)
 	{
 		if (!g_bSoloEnabled[iClient] && IsValidClient(iClient))
 			EmitSoundToClient(iClient, SOUND_NER_RESPAWNED, _, _, _, _, g_Cvar_HornVolumeLevel.FloatValue);
 	}
-	
+
 	SetAttributes(); // Otherwise player collisions are not disabled (weapon attributes should remain the same if loadout wasn't changed)
 }
 
@@ -1526,7 +1526,7 @@ public void OnRoundEnd(Event hEvent, char[] strEventName, bool bDontBroadcast)
 				int iLifeState = GetEntProp(iClient, Prop_Send, "m_lifeState");
 
 				// If player is (last) alive do not switch them
-				if (!iLifeState) continue; 
+				if (!iLifeState) continue;
 
 				ChangeClientTeam(iClient, g_iOldTeam[iClient]);
 				g_iOldTeam[iClient] = 0;
@@ -1622,12 +1622,12 @@ bool ParseConfig(char[] strConfigFile = "general.cfg", bool bUpdateGameplayConfi
 		// Writing our input string "1, 2" to an int array
 		if (strBuffer[0] != '\0')
 		{
-			char strExploded[MAX_ROCKETS][4]; 
+			char strExploded[MAX_ROCKETS][4];
 			int iLength = ExplodeString(strBuffer, ",", strExploded, sizeof(strExploded), sizeof(strExploded[]));
 
 			for (int n = 0; n < iLength; n++)
 				currentConfig.iPlayerCountPerRocket[n] = StringToInt(strExploded[n]);
-			
+
 			// Our array is filled with 0's as no data, so only sort over length used
 			SortIntegers(currentConfig.iPlayerCountPerRocket, iLength, Sort_Ascending); // iLength is capped at sizeof(strExploded)
 		}
@@ -1672,7 +1672,7 @@ bool ParseConfig(char[] strConfigFile = "general.cfg", bool bUpdateGameplayConfi
 		if (currentConfig.bNeverEndingRoundsAllowed && currentConfig.iForceNER)
 			g_bNERenabled = true;
 	}
-	
+
 	PopulateRocketSpawners();
 	Forward_OnRocketsConfigExecuted(strFileName, currentConfig);
 
@@ -1711,10 +1711,10 @@ public Action CmdLoadConfig(int iClient, int iArgs)
 {
 	if (!IsDodgeBallMap())
 	{
-		CReplyToCommand(iClient, "%t", "Command_Dodgeball_Disabled");		
+		CReplyToCommand(iClient, "%t", "Command_Dodgeball_Disabled");
 		return Plugin_Handled;
 	}
-	
+
 	// Loading default config
 	if (!iArgs)
 	{
@@ -1732,7 +1732,7 @@ public Action CmdLoadConfig(int iClient, int iArgs)
 
 		if (strConfigFile[0] == '.' || strConfigFile[0] == '\'' || strConfigFile[0] == '\\' || strConfigFile[0] == '/') // Stop some ..\ or "C:\.." exploration attempts
 			return Plugin_Handled;
-		
+
 		if (StrContains(strConfigFile, ".cfg", false) == -1)
 			StrCat(strConfigFile, sizeof(strConfigFile), ".cfg");
 
@@ -1746,7 +1746,7 @@ public Action CmdLoadConfig(int iClient, int iArgs)
 			return Plugin_Handled;
 		}
 	}
-	
+
 	CPrintToChatAll("%t", "Dodgeball_New_Config_Announce_All");
 	DestroyAllRockets();
 	SetAttributes();
@@ -1859,7 +1859,7 @@ char[] ShuntingYard(char[] strFormula)
 	int iStackPrecedence;	// Precedence of top of stack
 
 	bool bLastWasDigit = false;
-	
+
 	for (int n = 0; n < strlen(strFormula); n++)
 	{
 		buffer = strFormula[n];
@@ -1922,7 +1922,7 @@ char[] ShuntingYard(char[] strFormula)
 			else // No special cases, so just push onto operatorStack
 			{
 				operatorStack.Push(buffer);
-			}	
+			}
 		}
 
 		if (outputStack.Empty)
@@ -2001,7 +2001,7 @@ public Action CmdSolo(int iClient, int iArgs)
 	if (!g_bEnabled)
 	{
 		CReplyToCommand(iClient, "%t", "Command_Dodgeball_Disabled");
-		
+
 		return Plugin_Handled;
 	}
 
@@ -2048,7 +2048,7 @@ public Action CmdToggleFFA(int iClient, int iArgs)
 	if (!g_bEnabled)
 	{
 		CReplyToCommand(iClient, "%t", "Command_Dodgeball_Disabled");
-		
+
 		return Plugin_Handled;
 	}
 
@@ -2071,7 +2071,7 @@ public Action CmdVoteFFA(int iClient, int iArgs)
 	if (!g_bEnabled)
 	{
 		CReplyToCommand(iClient, "%t", "Command_Dodgeball_Disabled");
-		
+
 		return Plugin_Handled;
 	}
 
@@ -2092,23 +2092,23 @@ public Action CmdVoteFFA(int iClient, int iArgs)
 	if (IsVoteInProgress())
 	{
 		CReplyToCommand(iClient, "%t", "Dodgeball_Vote_Conflict");
-		
+
 		return Plugin_Handled;
 	}
 
 	g_iVoteTypeInProgress = 1;
-	
+
 	Menu hMenu = new Menu(VoteMenuHandler);
 	hMenu.VoteResultCallback = VoteResultHandler;
-	
+
 	hMenu.SetTitle("%s FFA mode?", g_bFFAenabled ? "Disable" : "Enable");
-	
+
 	hMenu.AddItem("0", "Yes");
 	hMenu.AddItem("1", "No");
-	
+
 	int iTotal;
 	int[] iClients = new int[MaxClients];
-	
+
 	for (int iPlayer = 1; iPlayer <= MaxClients; iPlayer++)
 	{
 		if (!IsClientInGame(iPlayer) || IsFakeClient(iPlayer))
@@ -2116,7 +2116,7 @@ public Action CmdVoteFFA(int iClient, int iArgs)
 
 		iClients[iTotal++] = iPlayer;
 	}
-	
+
 	hMenu.DisplayVote(iClients, iTotal, 10);
 
 	g_fFFAvoteTime = GetGameTime();
@@ -2150,7 +2150,7 @@ public Action CmdToggleNER(int iClient, int iArgs)
 	if (!g_bEnabled)
 	{
 		CReplyToCommand(iClient, "%t", "Command_Dodgeball_Disabled");
-		
+
 		return Plugin_Handled;
 	}
 
@@ -2173,7 +2173,7 @@ public Action CmdVoteNER(int iClient, int iArgs)
 	if (!g_bEnabled)
 	{
 		CReplyToCommand(iClient, "%t", "Command_Dodgeball_Disabled");
-		
+
 		return Plugin_Handled;
 	}
 
@@ -2194,23 +2194,23 @@ public Action CmdVoteNER(int iClient, int iArgs)
 	if (IsVoteInProgress())
 	{
 		CReplyToCommand(iClient, "%t", "Dodgeball_Vote_Conflict");
-		
+
 		return Plugin_Handled;
 	}
 
 	g_iVoteTypeInProgress = 2;
-	
+
 	Menu hMenu = new Menu(VoteMenuHandler);
 	hMenu.VoteResultCallback = VoteResultHandler;
-	
+
 	hMenu.SetTitle("%s NER mode?", g_bNERenabled ? "Disable" : "Enable");
-	
+
 	hMenu.AddItem("0", "Yes");
 	hMenu.AddItem("1", "No");
-	
+
 	int iTotal;
 	int[] iClients = new int[MaxClients];
-	
+
 	for (int iPlayer = 1; iPlayer <= MaxClients; iPlayer++)
 	{
 		if (!IsClientInGame(iPlayer) || IsFakeClient(iPlayer))
@@ -2218,7 +2218,7 @@ public Action CmdVoteNER(int iClient, int iArgs)
 
 		iClients[iTotal++] = iPlayer;
 	}
-	
+
 	hMenu.DisplayVote(iClients, iTotal, 10);
 
 	g_fNERvoteTime = GetGameTime();
@@ -2246,21 +2246,21 @@ public int VoteMenuHandler(Menu hMenu, MenuAction iMenuActions, int iParam1, int
 {
 	if (iMenuActions == MenuAction_End)
 		delete hMenu;
-	
+
 	return 0;
 }
 
 public void VoteResultHandler(Menu hMenu, int iNumVotes, int iNumClients, const int[][] iClientInfo, int iNumItems, const int[][] iItemInfo)
 {
 	int iWinnerIndex = 0;
-	
+
 	// Equal votes so we choose a random winner (with 1 vote for enabling)
 	if (iNumItems > 1 && (iItemInfo[0][VOTEINFO_ITEM_VOTES] == iItemInfo[1][VOTEINFO_ITEM_VOTES]))
 		iWinnerIndex = GetRandomInt(0, 1);
-	
+
 	char strWinner[8];
 	hMenu.GetItem(iItemInfo[iWinnerIndex][VOTEINFO_ITEM_INDEX], strWinner, sizeof(strWinner));
-	
+
 	// We use the same result handler, so we need to check what to enable
 	if (StrEqual(strWinner, "0"))
 	{
@@ -2301,7 +2301,7 @@ void RemoveInvalidRockets()
 			}
 
 			g_fLastRocketSpawned = GetGameTime(); // Delay until spawning next rocket
-			
+
 			g_rockets.Erase(n--); // g_rockets.Length changes
 		}
 		else if (!IsClientInGame(rocket.iOwner) || !IsValidClient(rocket.iTarget)) // Target / owner became invalid (left game or died), could also prevent soft anti steal, but rare cases
@@ -2328,7 +2328,7 @@ int FindRocketIndexByEntity(int iEntity)
 	for (int n = 0; n < g_rockets.Length; n++)
 	{
 		if (iEntity == g_rockets.Get(n, 0))
-			return n;			
+			return n;
 	}
 	return -1;
 }
@@ -2349,14 +2349,14 @@ int NumRocketsTargetting(int iClient)
 {
 	if (!IsValidClient(iClient))
 		return 0;
-	
+
 	Rocket rocket;
 	int count = 0;
 
 	for (int n = 0; n < g_rockets.Length; n++)
 	{
 		g_rockets.GetArray(n, rocket);
-		
+
 		if (rocket.bHasTarget && rocket.iTarget == iClient)
 			count++;
 	}
@@ -2379,7 +2379,7 @@ bool IsSpectator(int iClient)
 
 float Clamp(float fVal, float fMin, float fMax)
 {
-	if (fMax) 
+	if (fMax)
 		return fVal < fMin ? fMin : fVal > fMax ? fMax : fVal;
 	return fVal > fMin ? fVal : fMin;
 }
@@ -2395,7 +2395,7 @@ stock float GetEntitiesDistance(int iEnt1, int iEnt2)
 {
 	static float fOrig1[3]; GetEntPropVector(iEnt1, Prop_Send, "m_vecOrigin", fOrig1);
 	static float fOrig2[3]; GetEntPropVector(iEnt2, Prop_Send, "m_vecOrigin", fOrig2);
-	
+
 	return GetVectorDistance(fOrig1, fOrig2);
 }
 
@@ -2416,14 +2416,14 @@ int GetFirstBotClient()
 		if (IsClientInGame(iClient) && IsFakeClient(iClient))
 			return iClient;
 	}
-	
+
 	return 0;
 }
 
 int GetTeamAliveCount(int iTeam)
 {
 	int iCount;
-	
+
 	for (int iClient = 1; iClient <= MaxClients; iClient++)
 	{
 		if (IsValidClient(iClient) && (GetClientTeam(iClient) == iTeam))
@@ -2437,15 +2437,15 @@ int GetTeamRandomAliveClient(int iTeam)
 {
 	int[] iClients = new int[MaxClients];
 	int iCount;
-	
+
 	for (int iClient = 1; iClient <= MaxClients; iClient++)
 	{
 		if (!IsClientInGame(iClient)) continue;
-		
+
 		if ((GetClientTeam(iClient) == iTeam) && IsPlayerAlive(iClient))
 			iClients[iCount++] = iClient;
 	}
-	
+
 	return iCount == 0 ? -1 : iClients[GetRandomInt(0, iCount - 1)];
 }
 
@@ -2455,17 +2455,17 @@ void ChangeAliveClientTeam(int iClient, int iTeam)
 	SetEntProp(iClient, Prop_Send, "m_lifeState", 2);
 	ChangeClientTeam(iClient, iTeam);
 	SetEntProp(iClient, Prop_Send, "m_lifeState", 0);
-	
+
 	// Fixing colour of cosmetic(s) not changing
 	int iWearable;
 	int iWearablesCount = GetPlayerWearablesCount(iClient);
 
 	Address pData = DereferencePointer(GetEntityAddress(iClient) + g_pMyWearables);
-	
+
 	for (int iIndex = 0; iIndex < iWearablesCount; iIndex++)
 	{
 		iWearable = LoadEntityHandleFromAddress(pData + view_as<Address>(0x04 * iIndex));
-		
+
 		SetEntProp(iWearable, Prop_Send, "m_nSkin", (iTeam == view_as<int>(TFTeam_Blue)) ? 1 : 0);
 		SetEntProp(iWearable, Prop_Send, "m_iTeamNum", iTeam);
 	}
@@ -2486,7 +2486,7 @@ int HexToDec(const char[] hex)
 
 	return iResult;
 }
- 
+
 int HexCharToDec(char ch)
 {
 	if (ch >= '0' && ch <= '9')
@@ -2497,7 +2497,7 @@ int HexCharToDec(char ch)
 		return 10 + ch - 'a';
 
 	// This character is somehow at the front of the hex color strings after CFormatColor
-	if (ch == '\a') 
+	if (ch == '\a')
 		return 0;
 
 	return -1;
@@ -2532,35 +2532,35 @@ int GetPlayerWearablesCount(int iClient)
 public Action OnTFExplosion(const char[] strTEName, const int[] iClients, int iNumClients, float fDelay)
 {
 	static int bIgnoreHook;
-	
+
 	if (!g_bEnabled)
 	{
 		return Plugin_Continue;
 	}
-	
+
 	if (bIgnoreHook)
 	{
 		bIgnoreHook = false;
-		
+
 		return Plugin_Continue;
 	}
-	
+
 	TE_Start("TFExplosion");
-	
+
 	static float vecNormal[3]; TE_ReadVector("m_vecNormal", vecNormal);
-	
+
 	TE_WriteFloat("m_vecOrigin[0]", TE_ReadFloat("m_vecOrigin[0]"));
 	TE_WriteFloat("m_vecOrigin[1]", TE_ReadFloat("m_vecOrigin[1]"));
 	TE_WriteFloat("m_vecOrigin[2]", TE_ReadFloat("m_vecOrigin[2]"));
-	
+
 	TE_WriteVector("m_vecNormal", vecNormal);
-	
+
 	TE_WriteNum("m_iWeaponID", TE_ReadNum("m_iWeaponID"));
 	TE_WriteNum("entindex", TE_ReadNum("entindex"));
 	TE_WriteNum("m_nDefID", -1);
 	TE_WriteNum("m_nSound", TE_ReadNum("m_nSound"));
 	TE_WriteNum("m_iCustomParticleIndex", TE_ReadNum("m_iCustomParticleIndex"));
-	
+
 	bIgnoreHook = true;
 	TE_Send(iClients, iNumClients, fDelay);
 
@@ -2664,7 +2664,7 @@ public any Native_IsDodgeballEnabled(Handle hPlugin, int iNumParams)
 public any Native_CreateRocket(Handle hPlugin, int iNumParams)
 {
 	int iTeam = GetNativeCell(1);
-	
+
 	CreateRocket(iTeam == view_as<int>(TFTeam_Blue) ? g_iBlueSpawnerEntity : g_iRedSpawnerEntity, iTeam);
 
 	return 0;
