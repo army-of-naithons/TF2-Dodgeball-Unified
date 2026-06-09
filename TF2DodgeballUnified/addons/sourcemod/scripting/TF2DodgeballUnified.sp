@@ -278,14 +278,14 @@ void DisableDodgeball()
 	delete g_hSpeedometerHudColor;
 
 	// Unhooking all events
-	UnhookEventSafe("arena_round_start", OnSetupFinished, EventHookMode_PostNoCopy);
+	//UnhookEventSafe("arena_round_start", OnSetupFinished, EventHookMode_PostNoCopy);
 	UnhookEventSafe("teamplay_round_win", OnRoundEnd, EventHookMode_PostNoCopy);
 	UnhookEventSafe("teamplay_round_stalemate", OnRoundEnd, EventHookMode_PostNoCopy);
 	UnhookEventSafe("player_spawn", OnPlayerSpawn, EventHookMode_Post);
 	UnhookEventSafe("player_death", OnPlayerDeath, EventHookMode_Pre);
 	UnhookEventSafe("post_inventory_application", OnPlayerInventory, EventHookMode_Post);
 	UnhookEventSafe("object_deflected", OnObjectDeflected);
-	g_HookedEvents.Clear();
+	//g_HookedEvents.Clear();
 
 	// Resetting to default
 	SetConVarFloat(FindConVar("tf_flamethrower_burstammo"), 20.0);
