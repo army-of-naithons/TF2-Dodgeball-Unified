@@ -394,6 +394,13 @@ public void OnGameFrame()
 		{
 			static float fDirectionToTarget[3], fPlayerPosition[3];
 
+			if (!IsClientInGame(rocket.iTarget))
+			{
+				RemoveEdict(rocket.iEntity);
+				g_rockets.Erase(n);
+				continue;
+			}
+
 			GetClientEyePosition(rocket.iTarget, fPlayerPosition);
 
 			MakeVectorFromPoints(fRocketPosition, fPlayerPosition, fDirectionToTarget);
