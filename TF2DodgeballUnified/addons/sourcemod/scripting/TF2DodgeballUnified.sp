@@ -10,15 +10,16 @@
 #include <multicolors>
 #include <cfgmap>
 #include <tfdb>
+#include <aon/util/misc>
 
 // Requires tf2attributes.smx
 #include <tf2attributes>
 
 // ---- Plugin information --------------------------
 #define PLUGIN_NAME        "[TF2] Dodgeball Unified"
-#define PLUGIN_AUTHOR      "Mikah"
-#define PLUGIN_VERSION     "1.7.3"
-#define PLUGIN_URL         "https://github.com/Mikah31/TF2-Dodgeball-Unified"
+#define PLUGIN_AUTHOR      "Mikah, MAGNAT2645 (fixes)"
+#define PLUGIN_VERSION     "062026.a1"
+#define PLUGIN_URL         AON_STEAM_GROUP_URL
 
 public Plugin myinfo =
 {
